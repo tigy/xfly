@@ -1,0 +1,26 @@
+{	
+	"port": 8021,
+	"physicalPath": "",
+	"modules": {
+		"urlRewrite": "server/modules/urlrewritemodule.js",
+		"command": "server/modules/commandmodule.js",
+		"command": "server/modules/applaucher.js",
+		"dynaticImage": false,
+		"assets": "server/modules/assets.js"
+	},
+	"apps": {
+		"edit": "server/apps/edit.js",
+		"e": "server/apps/edit.js",
+		"settings": "server/apps/settings.js",
+		"explorer": "server/apps/explorer.js",
+		"o": "server/apps/explorer.js"
+	},
+	"handlers": {
+		"directory": "server/handlers/directoryhandler.js",
+		"error": "server/handlers/errorhandler.js",
+		".md": "server/handlers/markdownhandler.js",
+		".njs": "server/handlers/njshandler.js",
+		".ejs": "server/handlers/ejshandler.js",
+		"*": "server/handlers/staticfilehandler.js"
+	}
+}

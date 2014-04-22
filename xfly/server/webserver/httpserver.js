@@ -44,6 +44,12 @@ HttpServer.prototype = {
 
 	__proto__: HttpApplication.prototype,
 
+	/**
+	 * 当前应用程序对应的实际的 Http.Server 对象。
+	 * @type {Http.Server}
+	 */
+	socket: null,
+	
 	onError: function(e){
 		this.emit('error', e, this);
 	},

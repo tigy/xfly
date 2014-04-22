@@ -9,29 +9,11 @@ var Path = require('path'),
  */
 function HttpApplication(configs) {
 
-	this.headers = {
-		"X-Powered-By": "XFly 1.0"
-	};
+	this.headers = {};
 	this.modules = {};
 	this.handlers = {};
-	this.plugins = {};
-	this.mimeTypes = {
-		".html": "text/html",
-		".htm": "text/html",
-		".css": "text/css",
-		".less": "text/less",
-		".js": "text/javascript",
-		".txt": "text/plain",
-		".xml": "text/xml",
-		".png": "image/png",
-		".jpg": "image/jpg",
-		".jpeg": "image/jpeg",
-		".gif": "image/gif",
-		".svg": "image/svg",
-		".ico": "image/icon",
-		".mdb": null
-	};
 	this.errorPages = {};
+	this.virtualPaths = {};
 	this.defaultPages = {
 		"index.htm": true,
 		"index.html": true
@@ -62,18 +44,11 @@ HttpApplication.prototype = {
 	// 配置
 
 	/**
-	 * 当前应用程序对应的域名。
+	 * 当前应用程序对应的域名。如 www.domain.com。
 	 * @type {String}
 	 * @remark * 表示任意域名。
 	 */ 
 	host: "*",
-
-	/**
-	 * 当前应用程序对应的域名。
-	 * @type {String}
-	 * @remark * 表示任意域名。
-	 */
-	hosts: "*",
 
 	/**
 	 * 当前应用程序对应的 http 地址。
@@ -83,22 +58,16 @@ HttpApplication.prototype = {
 	address: '0.0.0.0',
 	
 	/**
-	 * 当前应用程序的真实地址。
-	 * @type {String}
-	 */
-	physicalPath: '.',
-	
-	/**
-	 * 当前应用程序的虚拟地址。
-	 * @type {String}
-	 */
-	virtualPath: '/',
-	
-	/**
 	 * 当前应用程序对应的端口。
 	 * @type {Integer}
 	 */ 
 	port: 80,
+	
+	/**
+	 * 当前应用程序的真实地址。
+	 * @type {String}
+	 */
+	physicalPath: '.',
 	
 	/**
 	 * 传输编码。
@@ -119,6 +88,12 @@ HttpApplication.prototype = {
 	fileEncoding: 'utf-8',
 	
 	/**
+	 * 当前应用程序的子虚拟地址。
+	 * @type {String}
+	 */
+	virtualPaths: null,
+	
+	/**
 	 * 支持的请求头信息。
 	 * @type {String}
 	 */
@@ -135,18 +110,6 @@ HttpApplication.prototype = {
 	 * @type {Object}
 	 */
 	handlers: null,
-	
-	/**
-	 * 支持的插件信息。
-	 * @type {Object}
-	 */
-	plugins: null,
-	
-	/**
-	 * 支持的 MIME 类型。
-	 * @type {Object}
-	 */
-	mimeTypes: null,
 	
 	/**
 	 * 支持的错误页。
@@ -180,12 +143,6 @@ HttpApplication.prototype = {
 
 	// 字段
 
-	/**
-	 * 当前应用程序对应的实际的 Http.Server 对象。
-	 * @type {Http.Server}
-	 */
-	socket: null,
-	
 	/**
 	 * 获取当前应用程序在应用程序池的 ID 。
 	 * @type {String}
@@ -221,27 +178,36 @@ HttpApplication.prototype = {
 		// 将当前地址转为绝对路径。
 		this.physicalPath = Path.resolve(this.physicalPath);
 
-		this.virtualPath = this.virtualPath || "";
-
 		this.port = +this.port || 80;
 
-		['modules', 'handlers', 'plugins'].forEach(function (value) {
-			var obj = this[value];
-			for (var key in obj) {
-				var name = obj[key];
-				switch (typeof name) {
-					case "string":
-						obj[key] = name = require(name);
-						// fall through
-					case "object":
-						if (name.init) {
-							name.init(this);
-						}
-						break;
-				}
-			}
-		}, this);
+		for(var virtualPath in this.virtualPaths) {
+			this.virtualPaths[virtualPath] =  Path.resolve(this.virtualPaths[virtualPath]);
+		}
+
+		this.loadModules(this.modules);
+		this.loadModules(this.handlers);
 		
+	},
+
+	/**
+	 * 初始化额外加载的其它模块。
+	 */
+	loadModules: function(moduleList) {
+		for (var key in moduleList) {
+			var module = moduleList[key];
+			switch (typeof module) {
+				case "string":
+					moduleList[key] = module = require(Path.resolve(__dirname, "../../", module));
+					// fall through
+				case "object":
+					if (module.init) {
+						module.init(this);
+					}
+					if(!module.processRequest) {
+						module.processRequest = Object;
+					}
+			}
+		}
 	},
 	
 	onApplicationStart: function(){
