@@ -31,9 +31,15 @@ exports.processRequest = function (context) {
 
 }
 
+var serverPort = 7003;
+
+var autoF5Server;
+
 function autoF5(context, content){
-return;
-	var serverPort = 7003;
+
+	if(!autoF5Server) {
+		autoF5Server = new (require('ws').Server)({port: serverPort});
+	}
 
 	// 为客户端追加 auto f5 的监听脚本。
 	context.response.write("<script>\
@@ -48,27 +54,28 @@ return;
 		autoF5.parentNode.removeChild(autoF5);\
 		</script>");
 
-	var server = require('net').createServer(function(socket){
-		
-	    // 我们获得一个连接 - 该连接自动关联一个socket对象
-	    console.log('connect: ' +  socket.remoteAddress + ':' + socket.remotePort);
+	autoF5Server.on('connection', function(socket){
 
-	    socket.setEncoding('binary');
+		var paths = [context.request.physicalPath];
 
-	    //数据错误事件
-	    socket.on('error',function(exception){
-	        socket.end();
-	    });
-	    
-	    //客户端关闭事件
-	    socket.on('close',function(data){
-	        socket.end();
-	    });
+		var watchers = [];
 
-	}).listen(serverPort);
+		function changeListener(e){
 
-	var watcher = FS.watch(context.request.applicationPathTransalted, { persistent: true }, function(){
-		console.log("aaaa");
-		socket.send("1");
+			// 停止所有监听器。
+			watchers.forEach(function(watcher){
+				watcher.close();
+			});
+
+			socket.send(e);
+
+		}
+
+		// 对每个文件进行监听。
+		paths.forEach(function(path, index) {
+			watchers[index] = FS.watch(path, {}, changeListener);
+		});
+
 	});
+
 }
