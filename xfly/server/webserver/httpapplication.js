@@ -7,36 +7,57 @@ var Path = require('path'),
  * 表示一个 HTTP 应用程序。
  * @param {Object} configs 应用程序的默认配置。
  */
-function HttpApplication(configs, pluginConfigs) {
+function HttpApplication(configs) {
 
-	this.headers = {};
+	this.headers = {
+		"X-Powered-By": "XFly 1.0"
+	};
 	this.modules = {};
 	this.handlers = {};
 	this.plugins = {};
-	this.mimeTypes = {};
+	this.mimeTypes = {
+		".html": "text/html",
+		".htm": "text/html",
+		".css": "text/css",
+		".less": "text/less",
+		".js": "text/javascript",
+		".txt": "text/plain",
+		".xml": "text/xml",
+		".png": "image/png",
+		".jpg": "image/jpg",
+		".jpeg": "image/jpeg",
+		".gif": "image/gif",
+		".svg": "image/svg",
+		".ico": "image/icon",
+		".mdb": null
+	};
 	this.errorPages = {};
-	this.defaultPages = {};
-	this.pluginConfigs = {};
+	this.defaultPages = {
+		"index.htm": true,
+		"index.html": true
+	};
 
 	loadConfigs(configs, this);
-	loadConfigs(pluginConfigs, this.pluginConfigs);
-}
 
-function loadConfigs(configs, target, deepCount) {
-	for (var key in configs) {
-		var value = configs[key]; 
-		if (value && target[key] && typeof value === "object" && typeof target[key] === "object") {
-			deepCount = deepCount || 0;
-			if (deepCount < 3) {
-				loadConfigs(value, target[key], deepCount + 1);
+	function loadConfigs(configs, target, deepCount) {
+		for (var key in configs) {
+			var value = configs[key]; 
+			if (value && target[key] && typeof value === "object" && typeof target[key] === "object") {
+				deepCount = deepCount || 0;
+				if (deepCount < 3) {
+					loadConfigs(value, target[key], deepCount + 1);
+				}
+			} else {
+				target[key] = value;
 			}
-		} else {
-			target[key] = value;
 		}
 	}
+
 }
 
 HttpApplication.prototype = {
+
+	__proto__: require('events').EventEmitter.prototype,
 
 	// 配置
 
@@ -71,13 +92,13 @@ HttpApplication.prototype = {
 	 * 当前应用程序的虚拟地址。
 	 * @type {String}
 	 */
-	virtualPath: '',
+	virtualPath: '/',
 	
 	/**
 	 * 当前应用程序对应的端口。
 	 * @type {Integer}
 	 */ 
-	port: 0,
+	port: 80,
 	
 	/**
 	 * 传输编码。
@@ -140,12 +161,6 @@ HttpApplication.prototype = {
 	defaultPages: null,
 	
 	/**
-	 * 用于存储插件配置的对象。
-	 * @type {Object}
-	 */
-	pluginConfigs: null,
-	
-	/**
 	 * 默认的 Session 过期时间。单位为分钟。
 	 * @type {Integer}
 	 */
@@ -161,7 +176,7 @@ HttpApplication.prototype = {
 	 * 存储 Session 的加密键。
 	 * @type {Integer}
 	 */
-	sessionCryptoKey: 'xfly2',
+	sessionCryptoKey: 'xfly1',
 
 	// 字段
 
@@ -186,15 +201,16 @@ HttpApplication.prototype = {
 	 * @type {String}
 	 */
 	get hostname(){
-		return this.host !== "*" ? this.host + (this.port !== 80 ? ':' + this.port : '')  : '*'
+		return this.host !== "*" ? this.host + (this.port !== 80 && this.port !== 0 ? ':' + this.port : '')  : '*'
 	},
 	
 	/**
+
 	 * 获取当前应用程序的主页地址。
 	 * @type {String}
 	 */
 	get rootUrl(){
-		return 'http://' + (this.host && this.host !== '*' ? this.host : this.address && this.address !== '0.0.0.0' ? this.address : 'localhost') + (this.port !== 80 ? ':' + this.port : '') + '/';
+		return 'http://' + (this.host !== '*' && this.host ? this.host : this.address && this.address !== '0.0.0.0' ? this.address : 'localhost') + (this.port !== 80 && this.port !== 0 ? ':' + this.port : '') + '/';
 	},
 	
 	/**
@@ -207,7 +223,7 @@ HttpApplication.prototype = {
 
 		this.virtualPath = this.virtualPath || "";
 
-		this.port = +this.port || 0;
+		this.port = +this.port || 80;
 
 		['modules', 'handlers', 'plugins'].forEach(function (value) {
 			var obj = this[value];
@@ -229,27 +245,27 @@ HttpApplication.prototype = {
 	},
 	
 	onApplicationStart: function(){
-		
+		this.emit("start", this);
 	},
 	
 	onApplicationStop: function(){
-		
+		this.emit("stop", this);
 	},
 	
 	onBeginRequest: function(context) { 
-	
+		this.emit("beginRequest", context);
 	},
 	
 	onEndRequest: function(context) { 
-	
+		this.emit("endRequest", context);
 	},
 	
 	onSessionStart: function(context){
-	
+		this.emit("sessionStart", context);
 	},
 	
 	onSessionEnd: function(context){
-	
+		this.emit("sessionEnd", context);
 	},
 	
 	reportError: function (context, statusCode, error) {
@@ -354,18 +370,15 @@ HttpApplication.prototype = {
 	},
 	
 	process: function(httpWorkerRequest){
-		this.processRequest(new HttpContext(httpWorkerRequest));
+		var context = new HttpContext(httpWorkerRequest);
+		this.onBeginRequest(context);
+		return this.processRequest(context);
 	},
 	
 	processRequest: function(context){
 	
-		// 绑定 application 对象。
-		context.applicationInstance = this;
-	
 		var me = this;
 		
-		me.onBeginRequest(context);
-	
 		// 优先使用各个模块处理请求，如果请求处理完毕，则返回 true 。
 		for(var key in me.modules){
 			if(me.modules[key] && me.modules[key].processRequest(context) === true){
