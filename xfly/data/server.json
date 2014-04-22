@@ -1,6 +1,9 @@
 {	
 	"port": 8021,
 	"physicalPath": "",
+	"virtualPaths": {
+
+	},
 	"modules": {
 		"urlRewrite": "server/modules/urlrewritemodule.js",
 		"command": "server/modules/commandmodule.js",
@@ -13,7 +16,8 @@
 		"e": "server/apps/edit.js",
 		"settings": "server/apps/settings.js",
 		"explorer": "server/apps/explorer.js",
-		"o": "server/apps/explorer.js"
+		"o": "server/apps/explorer.js",
+		"todo": "server/apps/todo.js"
 	},
 	"handlers": {
 		"directory": "server/handlers/directoryhandler.js",
@@ -21,6 +25,7 @@
 		".md": "server/handlers/markdownhandler.js",
 		".njs": "server/handlers/njshandler.js",
 		".ejs": "server/handlers/ejshandler.js",
+		".html": "server/handlers/autof5handler.js",
 		"*": "server/handlers/staticfilehandler.js"
 	}
 }

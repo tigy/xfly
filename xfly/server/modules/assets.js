@@ -2,5 +2,5 @@
 
 
 exports.init = function (application){
-	application.virtualPaths["/assets"] = require('path').resolve(__dirname, '../../assets/');
+	application.virtualPaths["/xfly"] = require('path').resolve(__dirname, '../../');
 };

@@ -1,6 +1,7 @@
 
-
-var Parser = require('./parsers');
+exports.init = function(application) {
+	application.markdownTpl = application.markdownTpl || "";
+};
 
 exports.processContent = function(content, context){
 	context.response.contentType = 'text/html';
@@ -9,16 +10,13 @@ exports.processContent = function(content, context){
 	<head>\r\n\
 		<meta charset="utf-8">\r\n\
 		');
-	
-	var tpl = context.applicationInstance.getConfig('markdown').tpl;
-	if(tpl)
-		context.response.write(tpl);
+	context.response.write(application.markdownTpl);
 	context.response.write('\r\n\
 	</head>\r\n\
 <body>\r\n\
 ');
-	
-	content = Parser.parseMarkDownSync(content);
+
+	content = parseMarkDownSync(content);
 	context.response.write(content);
 	context.response.write('\r\n\
 	</body>\r\n\
@@ -26,6 +24,9 @@ exports.processContent = function(content, context){
 	context.response.end();
 };
 
-exports.processRequest = require('./dynatichandler').processRequest;
+exports.processRequest = require('./common').processRequest;
 
-
+function parseMarkDownSync(content, options){
+	var markdown = require('node-markdown');
+	return markdown.Markdown(content.toString(), options);
+}

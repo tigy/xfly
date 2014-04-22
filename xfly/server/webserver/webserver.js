@@ -242,7 +242,7 @@ WebServer.prototype = {
 			
 			if(serverAddr.address === address && serverAddr.port === port) {
 				var application = server.hostnames[hostname] || server.hostnames['*']; 
-				application.processRequest(new HttpContext(httpWorkerRequest));
+				application.process(httpWorkerRequest);
 				return;
 			}
 			

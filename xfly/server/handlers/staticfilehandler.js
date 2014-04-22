@@ -21,8 +21,8 @@ exports.init = function (application) {
 	};
 };
 
-exports.writeFile = function (context, path) {
-	FS.readFile(path, function(error, content) {
+exports.processRequest = function (context) {
+	FS.readFile(context.request.physicalPath, function(error, content) {
 		if(error) {
 			context.reportError(400, error);
 			return;
@@ -42,8 +42,4 @@ exports.writeFile = function (context, path) {
 	});
 	
 	return true;
-}
-
-exports.processRequest = function (context) {
-	this.writeFile(context, context.request.physicalPath);
 };

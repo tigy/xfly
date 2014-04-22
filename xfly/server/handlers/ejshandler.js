@@ -10,6 +10,6 @@ exports.processContent = function(content, context){
 	context.response.end();
 };
 
-exports.processRequest = require('./dynatichandler').processRequest;
+exports.processRequest = require('./common').processRequest;
 
 

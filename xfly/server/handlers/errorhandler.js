@@ -20,13 +20,13 @@ exports.processRequest = function (context) {
 
             context.response.statusCode = 500;
             context.response.write(context.error);
-            console.log(context.error.stack);
+            console.error(context.error.stack);
         }
 
         context.response.end();
     } else {
         context.response.write(context.error);
-        console.log(context.error.stack);
+        console.error(context.error.stack);
     }
 
 

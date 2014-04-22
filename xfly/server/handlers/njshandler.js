@@ -11,8 +11,8 @@ exports.processRequest = function(context){
 			return;
 		}
 
-		context.response.contentEncoding = 'UTF-8';
-		context.response.contentType = 'text/html; charset=UTF-8';
+		context.response.contentEncoding = context.applicationInstance.contentEncoding;
+		context.response.contentType = 'text/html; charset=' + context.response.contentEncoding;
 		
 		var vmContext = initContext(context);
 		
