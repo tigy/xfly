@@ -1,8 +1,7 @@
 
 var Path = require('path'),
 	FS = require('fs'),
-	HttpContext = require('./httpcontext'),
-	DefaultConfigs = require('../configs');
+	HttpContext = require('./httpcontext');
 
 /**
  * 表示一个 HTTP 应用程序。
@@ -19,9 +18,7 @@ function HttpApplication(configs, pluginConfigs) {
 	this.defaultPages = {};
 	this.pluginConfigs = {};
 
-	loadConfigs(DefaultConfigs.web, this);
 	loadConfigs(configs, this);
-	loadConfigs(DefaultConfigs, this.pluginConfigs);
 	loadConfigs(pluginConfigs, this.pluginConfigs);
 }
 

@@ -33,7 +33,7 @@ function HttpServer() {
 	
 	server.on('listening', function(){
 		me.isListening = true;
-		var addr = me.address();
+		var addr = me.address;
 		me.address = addr.address;
 		me.port = addr.port;
 		me.init();
