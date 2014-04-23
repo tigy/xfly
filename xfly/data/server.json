@@ -1,14 +1,12 @@
 {	
 	"port": 8021,
-	"physicalPath": "",
+	"physicalPath": "../",
 	"virtualPaths": {
 
 	},
 	"modules": {
-		"urlRewrite": "server/modules/urlrewritemodule.js",
-		"command": "server/modules/commandmodule.js",
-		"command": "server/modules/applaucher.js",
-		"dynaticImage": false,
+		"urlRewrite": "server/modules/urlrewrite.js",
+		"applaucher": "server/modules/applaucher.js",
 		"assets": "server/modules/assets.js"
 	},
 	"apps": {
@@ -17,6 +15,7 @@
 		"settings": "server/apps/settings.js",
 		"explorer": "server/apps/explorer.js",
 		"o": "server/apps/explorer.js",
+		"exec": "server/apps/exec.js",
 		"todo": "server/apps/todo.js"
 	},
 	"handlers": {
@@ -26,6 +25,7 @@
 		".njs": "server/handlers/njshandler.js",
 		".ejs": "server/handlers/ejshandler.js",
 		".html": "server/handlers/autof5handler.js",
+		".htm": "server/handlers/autof5handler.js",
 		"*": "server/handlers/staticfilehandler.js"
 	}
 }

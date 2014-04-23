@@ -1,6 +1,8 @@
 
 var HttpServer = require("./webserver/httpserver");
-var server = new HttpServer(require("../data/server"));
+var globalConfigs = require("../data/server");
+
+var server = module.exports = new HttpServer(globalConfigs);
 
 server.on('start', function(){
 	console.log("[info]Server running at " + this.rootUrl);
@@ -19,3 +21,4 @@ server.on('error', function(){
 });	
 
 server.start();
+

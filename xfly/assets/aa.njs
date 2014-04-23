@@ -1,1 +1,0 @@
-response.end(request.applicationPath);

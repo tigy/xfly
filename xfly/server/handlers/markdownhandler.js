@@ -10,7 +10,7 @@ exports.processContent = function(content, context){
 	<head>\r\n\
 		<meta charset="utf-8">\r\n\
 		');
-	context.response.write(application.markdownTpl);
+	context.response.write(context.applicationInstance.markdownTpl);
 	context.response.write('\r\n\
 	</head>\r\n\
 <body>\r\n\
